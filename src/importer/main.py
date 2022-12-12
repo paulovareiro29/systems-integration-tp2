@@ -12,7 +12,7 @@ XML_OUTPUT_PATH = "/shared/output"
 def get_converted_files():
     list = []
     db = Database()
-    for file in db.selectAll("SELECT src FROM converted_documents"):
+    for file in db.selectAll("SELECT src FROM converted_documents WHERE deleted_on IS NULL"):
         list.append(file[0])
 
     return list
@@ -42,6 +42,7 @@ def insert_imported_doc(file_name, xml):
             "INSERT INTO imported_documents (file_name, xml) VALUES (%s,%s)", (file_name, xml))
     except Exception as error:
         print(error)
+        raise error
 
 
 def insert_converted_doc(src, dst, filesize):
@@ -51,6 +52,7 @@ def insert_converted_doc(src, dst, filesize):
             "INSERT INTO converted_documents(src, dst, file_size) VALUES (%s,%s,%s)", (src, dst, filesize))
     except Exception as error:
         print(error)
+        raise error
 
 
 if __name__ == "__main__":
@@ -71,18 +73,21 @@ if __name__ == "__main__":
             # we generate an unique file name for the XML file
             xml_path = generate_unique_file_name()
 
-            # we do the conversion
-            xml = convert_csv_to_xml(csv_path, xml_path)
+            try:
+                # we do the conversion
+                xml = convert_csv_to_xml(csv_path, xml_path)
 
-            print(f"new xml file generated: '{xml_path}'")
+                # insert into database
+                insert_imported_doc(file_name=csv_path,
+                                    xml=xml)
 
-            # insert into database
-            insert_imported_doc(file_name=csv_path,
-                                xml=xml)
+                insert_converted_doc(src=csv_path,
+                                     dst=xml_path,
+                                     filesize=os.stat(xml_path).st_size)
 
-            insert_converted_doc(src=csv_path,
-                                 dst=xml_path,
-                                 filesize=os.stat(xml_path).st_size)
+                print(f"new xml file generated: '{xml_path}'")
+            except:
+                os.remove(xml_path)
 
             # append converted file to array
             converted_files.append(csv_path)
