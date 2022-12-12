@@ -3,6 +3,7 @@ import time
 import uuid
 
 from utils.to_xml_converter import CSVtoXMLConverter
+from utils.database import Database
 
 CSV_INPUT_PATH = "/csv"
 XML_OUTPUT_PATH = "/shared/output"
@@ -19,7 +20,7 @@ def get_csv_files_in_input_folder():
 
 
 def generate_unique_file_name():
-    return f"/shared/output/{str(uuid.uuid4())}.xml"
+    return f"{XML_OUTPUT_PATH}/{str(uuid.uuid4())}.xml"
 
 
 def convert_csv_to_xml(in_path, out_path):

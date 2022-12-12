@@ -1,4 +1,5 @@
 from csv import DictReader
+from xml.sax.saxutils import escape
 
 
 class CSVReader:
@@ -19,6 +20,7 @@ class CSVReader:
             e = row[attr]
             if e not in entities:
                 entities[e] = builder(row)
-                after_create is not None and after_create(entities[e], row)
+                after_create is not None and after_create(
+                    entities[e], row)
 
         return entities

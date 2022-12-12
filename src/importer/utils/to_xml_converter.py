@@ -1,11 +1,11 @@
-import csv
 import xml.dom.minidom as md
 import xml.etree.ElementTree as ET
 
 from utils.reader import CSVReader
-from entities.country import Country
-from entities.team import Team
-from entities.player import Player
+
+from entities.type import Type
+from entities.area import Area
+from entities.airbnb import Airbnb
 
 
 class CSVtoXMLConverter:
@@ -14,47 +14,55 @@ class CSVtoXMLConverter:
         self._reader = CSVReader(path)
 
     def to_xml(self):
-        # read countries
-        countries = self._reader.read_entities(
-            attr="nationality",
-            builder=lambda row: Country(row["nationality"])
+
+        # read areas
+        areas = self._reader.read_entities(
+            attr="neighbourhood group",
+            builder=lambda row: Area(row["neighbourhood group"])
         )
 
-        # read teams
-        teams = self._reader.read_entities(
-            attr="Current Club",
-            builder=lambda row: Team(row["Current Club"])
+        # read types
+        types = self._reader.read_entities(
+            attr="room type",
+            builder=lambda row: Type(row["room type"])
         )
 
-        # read players
-
-        def after_creating_player(player, row):
-            # add the player to the appropriate team
-            teams[row["Current Club"]].add_player(player)
-
-        self._reader.read_entities(
-            attr="full_name",
-            builder=lambda row: Player(
-                name=row["full_name"],
-                age=row["age"],
-                country=countries[row["nationality"]]
-            ),
-            after_create=after_creating_player
+        # read airbnb
+        airbnbs = self._reader.read_entities(
+            attr="id",
+            builder=lambda row: Airbnb(
+                id=row["id"],
+                name=row["NAME"],
+                host_id=row["host id"],
+                host_name=row["host name"],
+                host_verified=row["host_identity_verified"],
+                neighbourhood=row["neighbourhood"],
+                price=row["price"],
+                latitude=row["lat"],
+                longitude=row["long"],
+                area=areas[row["neighbourhood group"]],
+                type=types[row["room type"]]
+            )
         )
 
         # generate the final xml
-        root_el = ET.Element("Football")
+        root_el = ET.Element("Root")
 
-        teams_el = ET.Element("Teams")
-        for team in teams.values():
-            teams_el.append(team.to_xml())
+        areas_el = ET.Element("Areas")
+        for area in areas.values():
+            areas_el.append(area.to_xml())
 
-        countries_el = ET.Element("Countries")
-        for country in countries.values():
-            countries_el.append(country.to_xml())
+        types_el = ET.Element("Types")
+        for type in types.values():
+            types_el.append(type.to_xml())
 
-        root_el.append(teams_el)
-        root_el.append(countries_el)
+        airbnbs_el = ET.Element("Airbnbs")
+        for airbnb in airbnbs.values():
+            airbnbs_el.append(airbnb.to_xml())
+
+        root_el.append(areas_el)
+        root_el.append(types_el)
+        root_el.append(airbnbs_el)
 
         return root_el
 
