@@ -1,0 +1,63 @@
+services:
+
+
+  db-xml:
+    container_name: is-db-xml
+    build: db/xml
+    volumes:
+      - xml-data:/var/lib/postgresql/shared-data/
+    ports:
+      - "10001:5432"
+
+  db-rel:
+    container_name: is-db-rel
+    build: db/rel
+    volumes:
+      - rel-data:/var/lib/postgresql/shared-data/
+    ports:
+      - "10002:5432"
+
+  importer:
+    container_name: is-importer
+    build: src/importer
+    volumes:
+      - ./src/importer:/usr/src/app
+      - ./volumes/shared:/shared
+      - ./volumes/csv:/csv
+
+
+  #dev:
+  #  container_name: is-dev
+  #  build: src
+  #  volumes:
+  #    - "./src:/usr/src/app"
+  #    - "./shared-data:/shared-data"
+  #  depends_on:
+  #    - db-xml
+
+  #server:
+  #  container_name: is-server
+  #  build: src
+  #  volumes:
+  #    - "./src:/usr/src/app"
+  #    - "./shared-data:/shared-data"
+  #  depends_on:
+  #    - db-xml
+
+  # converts data from CSV to XML
+
+
+
+  #daemon:
+  #  container_name: is-daemon
+  #  build: src/daemon
+  #  volumes:
+  #    - "./src/daemon:/usr/src/app"
+  #    - "./shared-data:/shared-data"
+  #  depends_on:
+  #    - db-xml
+  #    - db-rel
+
+volumes:
+  xml-data:
+  rel-data:
