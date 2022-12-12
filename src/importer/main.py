@@ -10,8 +10,12 @@ XML_OUTPUT_PATH = "/shared/output"
 
 
 def get_converted_files():
-    #!TODO: you should retrieve from the database the files that were already converted before
-    return []
+    list = []
+    db = Database()
+    for file in db.selectAll("SELECT src FROM converted_documents"):
+        list.append(file[0])
+
+    return list
 
 
 def get_csv_files_in_input_folder():
@@ -25,8 +29,28 @@ def generate_unique_file_name():
 
 def convert_csv_to_xml(in_path, out_path):
     converter = CSVtoXMLConverter(in_path)
+    xml = converter.to_xml_str()
     file = open(out_path, "w")
     file.write(converter.to_xml_str())
+    return xml
+
+
+def insert_imported_doc(file_name, xml):
+    db = Database()
+    try:
+        db.insert(
+            "INSERT INTO imported_documents (file_name, xml) VALUES (%s,%s)", (file_name, xml))
+    except Exception as error:
+        print(error)
+
+
+def insert_converted_doc(src, dst, filesize):
+    db = Database()
+    try:
+        db.insert(
+            "INSERT INTO converted_documents(src, dst, file_size) VALUES (%s,%s,%s)", (src, dst, filesize))
+    except Exception as error:
+        print(error)
 
 
 if __name__ == "__main__":
@@ -48,14 +72,19 @@ if __name__ == "__main__":
             xml_path = generate_unique_file_name()
 
             # we do the conversion
-            convert_csv_to_xml(csv_path, xml_path)
+            xml = convert_csv_to_xml(csv_path, xml_path)
 
             print(f"new xml file generated: '{xml_path}'")
 
-            #!TODO: we store the XML into the imported_documents table
+            # insert into database
+            insert_imported_doc(file_name=csv_path,
+                                xml=xml)
 
-            #!FIXME: instead of updating the local cache for converted files, we should reload them from the database
-            #!FIXME: in the next iteration
+            insert_converted_doc(src=csv_path,
+                                 dst=xml_path,
+                                 filesize=os.stat(xml_path).st_size)
+
+            # append converted file to array
             converted_files.append(csv_path)
 
         # hold execution for 60 seconds
