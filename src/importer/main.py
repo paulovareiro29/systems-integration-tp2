@@ -2,6 +2,9 @@ import os
 import time
 import uuid
 
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+
 from utils.to_xml_converter import CSVtoXMLConverter
 from utils.database import Database
 
@@ -55,42 +58,76 @@ def insert_converted_doc(src, dst, filesize):
         raise error
 
 
+class Watcher:
+    def __init__(self, directory=".", handler=FileSystemEventHandler()):
+        self._observer = Observer()
+        self._handler = handler
+        self._directory = directory
+
+    def run(self):
+        self._observer.schedule(self._handler, self._directory, recursive=True)
+        self._observer.start()
+        print(f"\nWatcher Running in {self._directory}/\n")
+
+        try:
+            while True:
+                time.sleep(1)
+        except:
+            self._observer.stop()
+        self._observer.join()
+
+        print("\nWatcher terminated\n")
+
+
+class CSVHandler(FileSystemEventHandler):
+    def __init__(self):
+        self._converted_files = get_converted_files()
+
+    def convert_csv(self, csv_path):
+        # here we avoid converting the same file again
+        if csv_path in self._converted_files:
+            return
+
+        print(f"new file to convert: '{csv_path}'")
+
+        # we generate an unique file name for the XML file
+        xml_path = generate_unique_file_name()
+
+        # we do the conversion
+        xml = convert_csv_to_xml(csv_path, xml_path)
+
+        try:
+            # insert converted doc
+            insert_converted_doc(src=csv_path,
+                                 dst=xml_path,
+                                 filesize=os.stat(xml_path).st_size)
+
+            # insert imported doc
+            insert_imported_doc(file_name=csv_path,
+                                xml=xml)
+
+            print(f"new xml file generated: '{xml_path}'")
+        except:
+            os.remove(xml_path)
+
+        # append the file to memory
+        self._converted_files.append(csv_path)
+
+    def on_created(self, event):
+        if not event.is_directory and event.src_path.endswith(".csv"):
+            self.convert_csv(event.src_path)
+
+    def on_any_event(self, event):
+        print(event)
+
+
 if __name__ == "__main__":
-    converted_files = get_converted_files()
+    handler = CSVHandler()
 
-    while True:
-        print("looking for new files...")
-        csv_files = get_csv_files_in_input_folder()
+    csv_files = get_csv_files_in_input_folder()
 
-        for csv_path in csv_files:
+    for csv_path in csv_files:
+        handler.convert_csv(csv_path)
 
-            # here we avoid converting the same file again
-            if csv_path in converted_files:
-                continue
-
-            print(f"new file to convert: '{csv_path}'")
-
-            # we generate an unique file name for the XML file
-            xml_path = generate_unique_file_name()
-
-            try:
-                # we do the conversion
-                xml = convert_csv_to_xml(csv_path, xml_path)
-
-                # insert into database
-                insert_imported_doc(file_name=csv_path,
-                                    xml=xml)
-
-                insert_converted_doc(src=csv_path,
-                                     dst=xml_path,
-                                     filesize=os.stat(xml_path).st_size)
-
-                print(f"new xml file generated: '{xml_path}'")
-            except:
-                os.remove(xml_path)
-
-            # append converted file to array
-            converted_files.append(csv_path)
-
-        # hold execution for 60 seconds
-        time.sleep(60)
+    w = Watcher(CSV_INPUT_PATH, CSVHandler())
+    w.run()
