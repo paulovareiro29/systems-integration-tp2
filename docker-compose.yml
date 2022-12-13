@@ -1,62 +1,50 @@
+
+
 services:
 
-
+  # Database to store XML data
   db-xml:
-    container_name: is-db-xml
-    build: db/xml
+    container_name: db-xml
+    build: images/db/xml
     volumes:
       - xml-data:/var/lib/postgresql/shared-data/
     ports:
       - "10001:5432"
 
+  # Database to store Relational data
   db-rel:
-    container_name: is-db-rel
-    build: db/rel
+    container_name: db-rel
+    build: images/db/rel
     volumes:
       - rel-data:/var/lib/postgresql/shared-data/
     ports:
       - "10002:5432"
 
+  # Container that automatically converts CSV to XML and then imports the XML to db-xml
   importer:
-    container_name: is-importer
-    build: src/importer
+    container_name: importer
+    build: images/python
     volumes:
       - ./src/importer:/usr/src/app
       - ./volumes/shared:/shared
       - ./volumes/csv:/csv
+    depends_on:
+      - db-xml
+    environment:
+      USE_DEV_MODE: ${USE_DEV_MODE}
 
-
-  #dev:
-  #  container_name: is-dev
-  #  build: src
-  #  volumes:
-  #    - "./src:/usr/src/app"
-  #    - "./shared-data:/shared-data"
-  #  depends_on:
-  #    - db-xml
-
-  #server:
-  #  container_name: is-server
-  #  build: src
-  #  volumes:
-  #    - "./src:/usr/src/app"
-  #    - "./shared-data:/shared-data"
-  #  depends_on:
-  #    - db-xml
-
-  # converts data from CSV to XML
-
-
-
-  #daemon:
-  #  container_name: is-daemon
-  #  build: src/daemon
-  #  volumes:
-  #    - "./src/daemon:/usr/src/app"
-  #    - "./shared-data:/shared-data"
-  #  depends_on:
-  #    - db-xml
-  #    - db-rel
+  # Container that runs the RPC server
+  rpc-server:
+    container_name: rpc-server
+    build: images/python
+    volumes:
+      - ./src/rpc-server:/usr/src/app
+      - ./volumes/shared:/shared
+    depends_on:
+      - db-xml
+    environment:
+      USE_DEV_MODE: ${USE_DEV_MODE}
+      RPC_SERVER_PORT: ${RPC_SERVER_PORT}
 
 volumes:
   xml-data:

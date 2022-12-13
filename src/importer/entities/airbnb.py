@@ -8,7 +8,7 @@ class Airbnb:
         self._name = name
         self._host_id = host_id
         self._host_name = host_name
-        self._host_verified = host_verified if host_verified is not "" else "unconfirmed"
+        self._host_verified = host_verified if host_verified != "" else "unconfirmed"
         self._price = str(price).replace("$", "").replace(",", "").strip()
         self._neighbourhood = neighbourhood
         self._area = area

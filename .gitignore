@@ -48,5 +48,5 @@ Thumbs.db
 *.mov
 *.wmv
 
-# Converted xml output
-/volumes/shared/output/*
+# Ignore XML files produced by the importer
+/volumes/output/*.xml
