@@ -10,6 +10,8 @@ RUN apt install nodejs
 RUN npm install -g npm@9.2.0
 RUN npm install -g nodemon
 
+RUN apt-get install dos2unix
+
 # upgrade pip
 RUN python -m pip install --upgrade pip
 
@@ -18,4 +20,4 @@ COPY ./requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # run the script
-CMD (chmod +x ./run.sh) && (./run.sh)
+CMD (dos2unix ./run.sh) && (chmod +x ./run.sh) && (./run.sh)
