@@ -10,8 +10,8 @@ from utils.to_xml_converter import CSVtoXMLConverter
 from utils.database import Database
 
 
-def get_csv_files_in_input_folder():
-    return [os.path.join(dp, f) for dp, dn, filenames in os.walk(CSV_INPUT_PATH) for f in filenames if
+def get_csv_files_in_directory(directory):
+    return [os.path.join(dp, f) for dp, dn, filenames in os.walk(directory) for f in filenames if
             os.path.splitext(f)[1] == '.csv']
 
 
@@ -119,7 +119,7 @@ if __name__ == "__main__":
 
     handler = CSVHandler(CSV_INPUT_PATH, XML_OUTPUT_PATH)
 
-    csv_files = get_csv_files_in_input_folder()
+    csv_files = get_csv_files_in_directory(CSV_INPUT_PATH)
 
     for csv_path in csv_files:
         asyncio.run(handler.convert_csv(csv_path))
