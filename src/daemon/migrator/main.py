@@ -40,7 +40,6 @@ if __name__ == "__main__":
             break
 
         print("Checking updates...")
-        # !TODO: 1- Execute a SELECT query to check for any changes on the table
         doc = db_org.selectOne(
             "SELECT id FROM imported_documents WHERE migrated IS false AND deleted_on IS NULL")
 
@@ -48,25 +47,37 @@ if __name__ == "__main__":
             time.sleep(POLLING_FREQ)
             continue
 
-        # !TODO: 2- Execute a SELECT queries with xpath to retrieve the data we want to store in the relational db
         areas = []
         types = []
         hosts = []
-        airbnbs = []
 
+        # Fetch areas from doc
+        print("Processing areas..")
         for area in db_org.selectAll(
                 f"SELECT unnest(xpath('//Area/@id', area)) AS id, unnest(xpath('//Area/@name', area)) FROM (SELECT unnest(xpath('//Areas/Area', xml)) AS area FROM imported_documents WHERE id = {doc[0]}) t"):
-            areas.append((area[0], Area(name=area[0])))
+            element = Area(name=area[1])
+            element.insertIntoDB()
+            areas.append((area[0], element))
 
+        # Fetch types from doc
+        print("Processing types..")
         for type in db_org.selectAll(
                 f"SELECT unnest(xpath('//Type/@id', type)) AS id, unnest(xpath('//Type/@name', type)) FROM (SELECT unnest(xpath('//Types/Type', xml)) AS type FROM imported_documents WHERE id = {doc[0]}) t"):
-            types.append((type[0], Type(name=type[1])))
+            element = Type(name=type[1])
+            element.insertIntoDB()
+            types.append((type[0], element))
 
+        # Fetch hosts from doc
+        print("Processing hosts..")
         for host in db_org.selectAll(
-                f"SELECT unnest(xpath('//Airbnb/Host/@id', airbnb)) AS id, unnest(xpath('//Airbnb/Host/Name/text()', airbnb)) AS name, unnest(xpath('//Airbnb/Host/Verified/text()', airbnb)) AS status  FROM (SELECT unnest(xpath('//Airbnbs/Airbnb', xml)) AS airbnb FROM imported_documents WHERE id = {doc[0]}) s"):
+                f"SELECT unnest(xpath('//Airbnb/Host/@id', airbnb)) AS id, unnest(xpath('//Airbnb/Host/Name/text()', airbnb)) AS name, unnest(xpath('//Airbnb/Host/Verified/text()', airbnb)) AS verified  FROM (SELECT unnest(xpath('//Airbnbs/Airbnb', xml)) AS airbnb FROM imported_documents WHERE id = {doc[0]}) s"):
+            element = Host(id=host[0], name=host[1], verified=host[2])
+            element.insertIntoDB()
             hosts.append(
-                (host[0], Host(id=host[0], name=host[1], status=host[2])))
+                (host[0], element))
 
+        # Fetch airbnbs from doc
+        print("Processing airbnbs..")
         for airbnb in db_org.selectAll(
                 f"SELECT unnest(xpath('//Airbnb/@id', airbnb)) AS id, unnest(xpath('//Airbnb/Name/text()', airbnb)) AS name,  unnest(xpath('//Airbnb/Price/text()', airbnb)) AS price, unnest(xpath('//Airbnb/Host/@id', airbnb)) AS host, unnest(xpath('//Airbnb/Address/@area_ref', airbnb)) AS area, unnest(xpath('//Airbnb/@type_ref', airbnb)) AS type, unnest(xpath('//Airbnb/Address/Neighbourhood/text()', airbnb)) AS neighbourhood,  unnest(xpath('//Airbnb/Address/Coordinates/Latitude/text()', airbnb)) AS latitude, unnest(xpath('//Airbnb/Address/Coordinates/Longitude/text()', airbnb)) AS Longitude  FROM (SELECT unnest(xpath('//Airbnbs/Airbnb', xml)) AS airbnb FROM imported_documents WHERE id = {doc[0]}) s"):
 
@@ -85,16 +96,17 @@ if __name__ == "__main__":
                 print("Host not found.. Skipping airbnb")
                 continue
 
-            airbnbs.append(Airbnb(id=airbnb[0],
-                                  name=airbnb[1],
-                                  price=airbnb[2],
-                                  host=host[0][1],
-                                  type=type[0][1],
-                                  area=area[0][1],
-                                  neighbourhood=airbnb[6],
-                                  latitude=airbnb[7],
-                                  longitude=airbnb[8]))
-        # !TODO: 3- Execute INSERT queries in the destination db
+            element = Airbnb(id=airbnb[0],
+                             name=airbnb[1],
+                             price=airbnb[2],
+                             host=host[0][1],
+                             type=type[0][1],
+                             area=area[0][1],
+                             neighbourhood=airbnb[6],
+                             latitude=airbnb[7],
+                             longitude=airbnb[8])
+
+            element.insertIntoDB()
         # !TODO: 4- Make sure we store somehow in the origin database that certain records were already migrated.
         #          Change the db structure if needed.
 

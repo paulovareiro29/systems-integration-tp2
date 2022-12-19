@@ -4,14 +4,14 @@ CREATE EXTENSION IF NOT EXISTS POSTGIS_TOPOLOGY;
 
 CREATE TABLE public.areas (
 	id				uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-	name			UNIQUE VARCHAR(250) NOT NULL,
+	name			VARCHAR(250) UNIQUE NOT NULL,
 	created_on      TIMESTAMP NOT NULL DEFAULT NOW(),
 	updated_on      TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE public.types (
 	id				uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-	name			UNIQUE VARCHAR(250) NOT NULL,
+	name			VARCHAR(250) UNIQUE NOT NULL,
 	created_on      TIMESTAMP NOT NULL DEFAULT NOW(),
 	updated_on      TIMESTAMP NOT NULL DEFAULT NOW()
 );

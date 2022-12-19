@@ -29,8 +29,9 @@ class Database:
     def disconnect(self):
         if self.conn:
             self.conn.close()
+            self.conn = None
 
-    def insert(self, sql, values):
+    def insert(self, sql, values=None):
         self.connect()
         try:
             with self.conn.cursor() as cursor:
@@ -40,6 +41,8 @@ class Database:
                 return True
         except psycopg2.Error as ex:
             raise ex
+        finally:
+            self.disconnect()
 
     def selectAll(self, query):
         self.connect()
