@@ -1,6 +1,7 @@
 import sys
 import time
 import signal
+import psycopg2.extras
 
 from utils.database import Database
 
@@ -8,6 +9,9 @@ from entities.area import Area
 from entities.type import Type
 from entities.host import Host
 from entities.airbnb import Airbnb
+
+# Register UUID to be able to insert UUIDs
+psycopg2.extras.register_uuid()
 
 POLLING_FREQ = int(sys.argv[1]) if len(sys.argv) >= 2 else 60
 
@@ -47,28 +51,38 @@ if __name__ == "__main__":
             time.sleep(POLLING_FREQ)
             continue
 
+        print("New document found!")
+
+        Area.counter = 0
+        Type.counter = 0
+        Host.counter = 0
+        Airbnb.counter = 0
+
         areas = []
         types = []
         hosts = []
 
         # Fetch areas from doc
-        print("Processing areas..")
+        print(" - Processing areas..")
         for area in db_org.selectAll(
                 f"SELECT unnest(xpath('//Area/@id', area)) AS id, unnest(xpath('//Area/@name', area)) FROM (SELECT unnest(xpath('//Areas/Area', xml)) AS area FROM imported_documents WHERE id = {doc[0]}) t"):
             element = Area(name=area[1])
             element.insertIntoDB()
             areas.append((area[0], element))
 
+        print(f"   - Added {Area.counter} new areas")
         # Fetch types from doc
-        print("Processing types..")
+        print(" - Processing types..")
         for type in db_org.selectAll(
                 f"SELECT unnest(xpath('//Type/@id', type)) AS id, unnest(xpath('//Type/@name', type)) FROM (SELECT unnest(xpath('//Types/Type', xml)) AS type FROM imported_documents WHERE id = {doc[0]}) t"):
             element = Type(name=type[1])
             element.insertIntoDB()
             types.append((type[0], element))
 
+        print(f"   - Added {Type.counter} new types")
+
         # Fetch hosts from doc
-        print("Processing hosts..")
+        print(" - Processing hosts..")
         for host in db_org.selectAll(
                 f"SELECT unnest(xpath('//Airbnb/Host/@id', airbnb)) AS id, unnest(xpath('//Airbnb/Host/Name/text()', airbnb)) AS name, unnest(xpath('//Airbnb/Host/Verified/text()', airbnb)) AS verified  FROM (SELECT unnest(xpath('//Airbnbs/Airbnb', xml)) AS airbnb FROM imported_documents WHERE id = {doc[0]}) s"):
             element = Host(id=host[0], name=host[1], verified=host[2])
@@ -76,8 +90,10 @@ if __name__ == "__main__":
             hosts.append(
                 (host[0], element))
 
+        print(f"   - Added {Host.counter} new hosts")
+
         # Fetch airbnbs from doc
-        print("Processing airbnbs..")
+        print(" - Processing airbnbs..")
         for airbnb in db_org.selectAll(
                 f"SELECT unnest(xpath('//Airbnb/@id', airbnb)) AS id, unnest(xpath('//Airbnb/Name/text()', airbnb)) AS name,  unnest(xpath('//Airbnb/Price/text()', airbnb)) AS price, unnest(xpath('//Airbnb/Host/@id', airbnb)) AS host, unnest(xpath('//Airbnb/Address/@area_ref', airbnb)) AS area, unnest(xpath('//Airbnb/@type_ref', airbnb)) AS type, unnest(xpath('//Airbnb/Address/Neighbourhood/text()', airbnb)) AS neighbourhood,  unnest(xpath('//Airbnb/Address/Coordinates/Latitude/text()', airbnb)) AS latitude, unnest(xpath('//Airbnb/Address/Coordinates/Longitude/text()', airbnb)) AS Longitude  FROM (SELECT unnest(xpath('//Airbnbs/Airbnb', xml)) AS airbnb FROM imported_documents WHERE id = {doc[0]}) s"):
 
@@ -107,7 +123,14 @@ if __name__ == "__main__":
                              longitude=airbnb[8])
 
             element.insertIntoDB()
+
+        print(f"   - Added {Airbnb.counter} new airbnbs")
+
         # !TODO: 4- Make sure we store somehow in the origin database that certain records were already migrated.
         #          Change the db structure if needed.
+        db_org.update(
+            f"UPDATE imported_documents SET migrated = 'TRUE' WHERE id = {doc[0]}")
+
+        print(" - Finished processing document")
 
         time.sleep(POLLING_FREQ)

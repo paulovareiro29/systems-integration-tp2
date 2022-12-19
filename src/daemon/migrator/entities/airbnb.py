@@ -19,15 +19,10 @@ class Airbnb:
         try:
             db = Database(host="db-rel")
 
-            # db.insert(
-            #    f'''INSERT INTO airbnbs (id, name, price, host_id, type_id, area_id, neighbourhood, geom) VALUES ('{self._id}','{self._name}','{self._price}','{self._host._id}','{self._type._id}','{self._area._id}','{self._neighbourhood}', 'POINT({self._latitude} {self._longitude})')''')
-
             db.insert(
                 f'''INSERT INTO airbnbs (id, name, price, host_id, type_id, area_id, neighbourhood, geom) VALUES (%s,%s,%s,%s,%s,%s,%s,'POINT(%s %s)')''', (self._id, self._name, self._price, self._host._id, self._type._id, self._area._id, self._neighbourhood, self._latitude, self._longitude))
-
-            print("New Airbnb inserted!")
+            Airbnb.counter += 1
         except Exception as err:
-            print(err)
             res = db.selectOne(
                 f"SELECT id FROM airbnbs WHERE id = '{self._id}'")
             if res is not None:
@@ -35,3 +30,6 @@ class Airbnb:
 
     def __str__(self):
         return f"({self._id}) {self._name} {self._price} {self._latitude} {self._longitude}"
+
+
+Airbnb.counter = 0

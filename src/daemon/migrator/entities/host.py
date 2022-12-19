@@ -5,7 +5,7 @@ from utils.database import Database
 
 class Host:
     def __init__(self, id, name, verified):
-        self._id = uuid.uuid5(uuid.NAMESPACE_OID, id)
+        self._id = str(uuid.uuid5(uuid.NAMESPACE_OID, id))
         self._name = name
         self._verified = verified
 
@@ -15,6 +15,7 @@ class Host:
 
             db.insert(
                 f"INSERT INTO hosts (id, name, verified) VALUES ('{self._id}', '{self._name}', '{self._verified}')")
+            Host.counter += 1
         except Exception as err:
             res = db.selectOne(
                 f"SELECT id FROM hosts WHERE id = '{self._id}'")
@@ -23,3 +24,6 @@ class Host:
 
     def __str__(self):
         return f" ({self._id}) {self._name} - {self._status}"
+
+
+Host.counter = 0

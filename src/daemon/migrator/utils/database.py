@@ -44,6 +44,19 @@ class Database:
         finally:
             self.disconnect()
 
+    def update(self, sql, values=None):
+        self.connect()
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(query=sql, vars=values)
+                self.conn.commit()
+                cursor.close()
+                return True
+        except psycopg2.Error as ex:
+            raise ex
+        finally:
+            self.disconnect()
+
     def selectAll(self, query):
         self.connect()
         with self.conn.cursor() as cursor:
