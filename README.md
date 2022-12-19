@@ -3,7 +3,7 @@
 ### Introduction
 
 This environment allows you to easily install the development environment and its dependencies.
-This is to be used for the 1st project in Systems Integration course from Informatics Engineering at IPVC/ESTG.
+This is to be used for the 2nd project in Systems Integration course from Informatics Engineering at IPVC/ESTG.
 
 ### How to I setup my development environment?
 
@@ -68,6 +68,74 @@ docker-compose run --rm <name of the container that uses this image> python db-a
 
 - Every time you use the command **_docker-compose run_**, a new unnamed container will be created. The **_--rm flag_** will automatically remove the created container once the run is over.
 - Please consider that if you use **docker-compose run**, the bash script **run.sh** needs to be run manually in order to execute the application
+
+### Architecture
+
+![alt text](architecture.png)
+
+#### Containers
+
+##### _pg-xml_
+
+Database where the xml and csv converted files are stored.
+
+##### _pg-rel_
+
+Database where the relational data is stored, namely the entities of the system.
+
+##### _importer_
+
+Daemon-type application, which runs in the background. The application must constantly look for new CSV files in the Docker csv volume and start converting to XML and then migrating to the pg-xml database.
+
+##### _migrater_
+
+Daemon-type application, which runs in the background and is started every 5 mins (configurable). The application will check if there are new files in the imported_documents table of the pg-xml and perform the migration of the XML data to the pg-rel database tables, using the api-entities API.
+
+##### _update-gis_
+
+Daemon-type application, which runs in the background and is started every 5 mins (configurable). The application will select up to 100 entities from the pg-rel database for which it is necessary to update or obtain GPS coordinates. As with TP1, the coordinates can be obtained using Nominatim's Search API, with the already existing HTTP Requests module in Python.
+
+##### _api-entities_
+
+Web REST API in Django that allows performing CRUD of all entities.
+
+##### _api-gis_
+
+Web REST API in Django that allows obtaining geographical data by region.
+
+##### _api-proc_
+
+Web REST API in Django that allows for reporting. Obtains the data from the RPC Server.
+
+##### _api-graphql_
+
+Web GraphQL API that allows for reporting. Obtains the data from the Entities API.
+
+##### _frontend-ent_
+
+Web frontend application that allows consulting the entities' data.
+
+##### _frontend-gis_
+
+Web frontend application based in Leaflet that allows consulting the entities in a map.
+
+##### _frontend-proc_
+
+Web frontend application that allows consulting the reports of the system.
+
+##### _rpc-server_
+
+RPC application that does reporting over the XML database.
+
+#### Volumes
+
+##### _csv_
+
+Place where we can drop CSVs to be imported by the system.
+
+##### _shared_
+
+Generic volume that can be used for any purpose, to help out developing the other containers.
 
 ---
 
