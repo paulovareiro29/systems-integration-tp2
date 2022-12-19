@@ -48,6 +48,8 @@ if __name__ == "__main__":
             "SELECT id FROM imported_documents WHERE migrated IS false AND deleted_on IS NULL")
 
         if doc is None:
+            print("No updates found")
+            print("Sleeping..\n")
             time.sleep(POLLING_FREQ)
             continue
 
@@ -131,6 +133,6 @@ if __name__ == "__main__":
         db_org.update(
             f"UPDATE imported_documents SET migrated = 'TRUE' WHERE id = {doc[0]}")
 
-        print(" - Finished processing document")
-
+        print("Finished processing document")
+        print(f"Sleeping..\n")
         time.sleep(POLLING_FREQ)
