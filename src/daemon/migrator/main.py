@@ -128,8 +128,7 @@ if __name__ == "__main__":
 
         print(f"   - Added {Airbnb.counter} new airbnbs")
 
-        # !TODO: 4- Make sure we store somehow in the origin database that certain records were already migrated.
-        #          Change the db structure if needed.
+        # Update imported doc
         db_org.update(
             f"UPDATE imported_documents SET migrated = 'TRUE' WHERE id = {doc[0]}")
 
