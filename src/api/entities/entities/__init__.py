@@ -1,1 +1,2 @@
-from .team import Team
+from .type import Type
+from .area import Area

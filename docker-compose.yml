@@ -136,6 +136,8 @@ services:
       - "${EXT_PORT_API_ENTITIES}:${API_PORT}"
     environment:
       API_PORT: ${API_PORT}
+    depends_on:
+      - db-rel
 
   # Container that runs the API for gis
   api-gis:

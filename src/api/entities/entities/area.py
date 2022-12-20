@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 
-class Team:
+class Area:
     def __init__(self, name, id=None, created_on=None, updated_on=None):
         self.id = id or uuid.uuid4()
         self.name = name
