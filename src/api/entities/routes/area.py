@@ -70,7 +70,7 @@ def update(id):
     try:
         db = Database()
         db.update(
-            f"UPDATE areas SET name=%s, updated_on=%s WHERE id=%s", (area.name, area.updated_on, area.id))
+            f"UPDATE areas SET name=%s, updated_on=%s WHERE id=%s", (area.name, area.updated_on, str(area.id)))
 
         return get(id)
     except Exception:

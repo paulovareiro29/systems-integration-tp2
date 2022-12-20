@@ -70,7 +70,7 @@ def update(id):
     try:
         db = Database()
         db.update(
-            f"UPDATE types SET name=%s, updated_on=%s WHERE id=%s", (type.name, type.updated_on, type.id))
+            f"UPDATE types SET name=%s, updated_on=%s WHERE id=%s", (type.name, type.updated_on, str(type.id)))
 
         return get(id)
     except Exception:

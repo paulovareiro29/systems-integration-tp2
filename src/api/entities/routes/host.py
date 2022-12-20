@@ -73,7 +73,7 @@ def update(id):
 
         db = Database()
         db.update(
-            f"UPDATE hosts SET name=%s, verified=%s, updated_on=%s WHERE id=%s", (host.name, host.verified, host.updated_on, host.id))
+            f"UPDATE hosts SET name=%s, verified=%s, updated_on=%s WHERE id=%s", (host.name, host.verified, host.updated_on, str(host.id)))
 
         return get(id)
     except Exception:
