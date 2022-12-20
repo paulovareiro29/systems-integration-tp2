@@ -39,10 +39,10 @@ def get(id):
 def create():
     data = request.get_json()
 
-    type = Type(id=data.get("id"),
-                name=data["name"])
-
     try:
+        type = Type(id=data.get("id"),
+                    name=data["name"])
+
         db = Database()
         db.insert(
             "INSERT INTO types (id, name, created_on, updated_on) VALUES (%s, %s, %s, %s)", (str(type.id), type.name, type.created_on, type.updated_on))

@@ -39,10 +39,10 @@ def get(id):
 def create():
     data = request.get_json()
 
-    area = Area(id=data.get("id"),
-                name=data["name"])
-
     try:
+        area = Area(id=data.get("id"),
+                    name=data["name"])
+
         db = Database()
         db.insert(
             "INSERT INTO areas (id, name, created_on, updated_on) VALUES (%s, %s, %s, %s)", (str(area.id), area.name, area.created_on, area.updated_on))

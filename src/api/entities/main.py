@@ -1,7 +1,7 @@
 import sys
 from flask import Flask
 
-from routes import bpArea, bpType
+from routes import bpArea, bpType, bpHost
 
 PORT = int(sys.argv[1]) if len(sys.argv) >= 2 else 9000
 
@@ -10,6 +10,7 @@ app.config["DEBUG"] = True
 
 app.register_blueprint(bpArea, url_prefix="/api/area")
 app.register_blueprint(bpType, url_prefix="/api/type")
+app.register_blueprint(bpHost, url_prefix="/api/host")
 
 
 if __name__ == '__main__':
