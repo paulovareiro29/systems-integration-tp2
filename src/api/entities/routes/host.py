@@ -8,9 +8,12 @@ bpHost = Blueprint("host", __name__)
 
 @bpHost.route("/", methods=["GET"])
 def index():
+    page = int(request.args.get("page")) or 0
+    perPage = int(request.args.get("perPage")) or 50
+
     db = Database()
     result: list[Host] = []
-    for host in db.selectAll("SELECT id, name,verified, created_on, updated_on FROM hosts"):
+    for host in db.selectAll(f"SELECT id, name,verified, created_on, updated_on FROM hosts OFFSET {page * perPage} LIMIT {perPage}"):
         result.append(Host(id=host[0],
                            name=host[1],
                            verified=host[2],

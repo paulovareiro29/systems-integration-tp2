@@ -8,9 +8,12 @@ bpType = Blueprint("type", __name__)
 
 @bpType.route("/", methods=["GET"])
 def index():
+    page = int(request.args.get("page")) or 0
+    perPage = int(request.args.get("perPage")) or 50
+
     db = Database()
     result: list[Type] = []
-    for type in db.selectAll("SELECT id, name, created_on, updated_on FROM types"):
+    for type in db.selectAll(f"SELECT id, name, created_on, updated_on FROM types OFFSET {page * perPage} LIMIT {perPage}"):
         result.append(Type(id=type[0],
                            name=type[1],
                            created_on=type[2],

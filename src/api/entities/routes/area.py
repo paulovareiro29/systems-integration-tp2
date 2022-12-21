@@ -8,9 +8,12 @@ bpArea = Blueprint("area", __name__)
 
 @bpArea.route("/", methods=["GET"])
 def index():
+    page = int(request.args.get("page")) or 0
+    perPage = int(request.args.get("perPage")) or 50
+
     db = Database()
     result: list[Area] = []
-    for area in db.selectAll("SELECT id, name, created_on, updated_on FROM areas"):
+    for area in db.selectAll(f"SELECT id, name, created_on, updated_on FROM areas OFFSET {page * perPage} LIMIT {perPage}"):
         result.append(Area(id=area[0],
                            name=area[1],
                            created_on=area[2],

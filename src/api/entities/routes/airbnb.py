@@ -8,9 +8,12 @@ bpAirbnb = Blueprint("airbnb", __name__)
 
 @bpAirbnb.route("/", methods=["GET"])
 def index():
+    page = int(request.args.get("page")) or 0
+    perPage = int(request.args.get("perPage")) or 50
+
     db = Database()
     result: list[Airbnb] = []
-    for airbnb in db.selectAll("SELECT id, name, price, host_id, type_id, area_id, neighbourhood, ST_X(geom), ST_Y(geom), geom, created_on, updated_on FROM airbnbs"):
+    for airbnb in db.selectAll(f"SELECT id, name, price, host_id, type_id, area_id, neighbourhood, ST_X(geom), ST_Y(geom), geom, created_on, updated_on FROM airbnbs OFFSET {page * perPage} LIMIT {perPage}"):
         result.append(Airbnb(id=airbnb[0],
                              name=airbnb[1],
                              price=airbnb[2],
