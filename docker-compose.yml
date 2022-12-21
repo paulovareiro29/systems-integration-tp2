@@ -85,9 +85,10 @@ services:
     ports:
       - "${EXT_PORT_FRONTEND_ENT}:${EXT_PORT_FRONTEND_ENT}"
     environment:
+      WATCHPACK_POLLING: true
       USE_DEV_MODE: ${USE_DEV_MODE}
       WEB_PORT: ${EXT_PORT_FRONTEND_ENT}
-      API_ENTITIES_URL: "api-entities:${API_PORT}"
+      API_ENTITIES_URL: "localhost:${EXT_PORT_API_ENTITIES}"
     depends_on:
       - api-entities
 
