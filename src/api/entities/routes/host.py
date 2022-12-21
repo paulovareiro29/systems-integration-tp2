@@ -1,5 +1,6 @@
 import math
 from flask import Blueprint, jsonify, request
+from utils.safe import toSafeInt
 from utils.database import Database
 
 from entities import Host
@@ -9,8 +10,8 @@ bpHost = Blueprint("host", __name__)
 
 @bpHost.route("/", methods=["GET"])
 def index():
-    page = int(request.args.get("page")) or 0
-    limit = int(request.args.get("limit")) or 50
+    page = toSafeInt(request.args.get("page"), 0)
+    limit = toSafeInt(request.args.get("limit"), 50)
 
     db = Database()
     result: list[Host] = []
@@ -25,6 +26,7 @@ def index():
     return jsonify({"data": [host.__dict__ for host in result],
                     "pagination": {"count": maxEntities[0],
                                    "last_page": math.ceil(maxEntities[0] / limit) - 1,
+                                   "page": page,
                                    "limit": limit}})
 
 
