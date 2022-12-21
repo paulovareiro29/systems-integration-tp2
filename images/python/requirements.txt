@@ -4,5 +4,6 @@ py-mon==1.1.0
 watchdog==2.1.9
 pandas==1.5.2
 flask==2.2.2
+flask-cors
 Flask-GraphQL==2.0.1
 graphene
