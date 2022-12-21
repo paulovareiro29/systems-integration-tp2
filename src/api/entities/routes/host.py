@@ -1,3 +1,4 @@
+import math
 from flask import Blueprint, jsonify, request
 from utils.database import Database
 
@@ -9,18 +10,22 @@ bpHost = Blueprint("host", __name__)
 @bpHost.route("/", methods=["GET"])
 def index():
     page = int(request.args.get("page")) or 0
-    perPage = int(request.args.get("perPage")) or 50
+    limit = int(request.args.get("limit")) or 50
 
     db = Database()
     result: list[Host] = []
-    for host in db.selectAll(f"SELECT id, name,verified, created_on, updated_on FROM hosts OFFSET {page * perPage} LIMIT {perPage}"):
+    maxEntities = db.selectOne(f"SELECT count(id) FROM hosts")
+    for host in db.selectAll(f"SELECT id, name,verified, created_on, updated_on FROM hosts OFFSET {page * limit} LIMIT {limit}"):
         result.append(Host(id=host[0],
                            name=host[1],
                            verified=host[2],
                            created_on=host[3],
                            updated_on=host[4]))
 
-    return jsonify([host.__dict__ for host in result])
+    return jsonify({"data": [host.__dict__ for host in result],
+                    "pagination": {"count": maxEntities[0],
+                                   "last_page": math.ceil(maxEntities[0] / limit) - 1,
+                                   "limit": limit}})
 
 
 @bpHost.route("/<id>", methods=["GET"])

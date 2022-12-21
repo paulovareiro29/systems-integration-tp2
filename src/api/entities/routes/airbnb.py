@@ -1,6 +1,6 @@
+import math
 from flask import Blueprint, jsonify, request
 from utils.database import Database
-
 from entities import Airbnb
 
 bpAirbnb = Blueprint("airbnb", __name__)
@@ -9,11 +9,13 @@ bpAirbnb = Blueprint("airbnb", __name__)
 @bpAirbnb.route("/", methods=["GET"])
 def index():
     page = int(request.args.get("page")) or 0
-    perPage = int(request.args.get("perPage")) or 50
+    limit = int(request.args.get("limit")) or 50
 
     db = Database()
     result: list[Airbnb] = []
-    for airbnb in db.selectAll(f"SELECT id, name, price, host_id, type_id, area_id, neighbourhood, ST_X(geom), ST_Y(geom), geom, created_on, updated_on FROM airbnbs OFFSET {page * perPage} LIMIT {perPage}"):
+
+    maxEntities = db.selectOne(f"SELECT count(id) FROM airbnbs")
+    for airbnb in db.selectAll(f"SELECT id, name, price, host_id, type_id, area_id, neighbourhood, ST_X(geom), ST_Y(geom), geom, created_on, updated_on FROM airbnbs OFFSET {page * limit} LIMIT {limit}"):
         result.append(Airbnb(id=airbnb[0],
                              name=airbnb[1],
                              price=airbnb[2],
@@ -27,7 +29,10 @@ def index():
                              created_on=airbnb[10],
                              updated_on=airbnb[11]))
 
-    return jsonify([airbnb.__dict__ for airbnb in result])
+    return jsonify({"data": [airbnb.__dict__ for airbnb in result],
+                    "pagination": {"count": maxEntities[0],
+                                   "last_page": math.ceil(maxEntities[0] / limit) - 1,
+                                   "limit": limit}})
 
 
 @bpAirbnb.route("/<id>", methods=["GET"])

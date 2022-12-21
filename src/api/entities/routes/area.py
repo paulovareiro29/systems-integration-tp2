@@ -1,3 +1,4 @@
+import math
 from flask import Blueprint, jsonify, request
 from utils.database import Database
 
@@ -9,17 +10,22 @@ bpArea = Blueprint("area", __name__)
 @bpArea.route("/", methods=["GET"])
 def index():
     page = int(request.args.get("page")) or 0
-    perPage = int(request.args.get("perPage")) or 50
+    limit = int(request.args.get("limit")) or 50
 
     db = Database()
     result: list[Area] = []
-    for area in db.selectAll(f"SELECT id, name, created_on, updated_on FROM areas OFFSET {page * perPage} LIMIT {perPage}"):
+
+    maxEntities = db.selectOne(f"SELECT count(id) FROM areas")
+    for area in db.selectAll(f"SELECT id, name, created_on, updated_on FROM areas OFFSET {page * limit} LIMIT {limit}"):
         result.append(Area(id=area[0],
                            name=area[1],
                            created_on=area[2],
                            updated_on=area[3]))
 
-    return jsonify([area.__dict__ for area in result])
+    return jsonify({"data": [area.__dict__ for area in result],
+                    "pagination": {"count": maxEntities[0],
+                                   "last_page": math.ceil(maxEntities[0] / limit) - 1,
+                                   "limit": limit}})
 
 
 @bpArea.route("/<id>", methods=["GET"])

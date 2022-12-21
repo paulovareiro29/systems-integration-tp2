@@ -1,3 +1,4 @@
+import math
 from flask import Blueprint, jsonify, request
 from utils.database import Database
 
@@ -9,17 +10,21 @@ bpType = Blueprint("type", __name__)
 @bpType.route("/", methods=["GET"])
 def index():
     page = int(request.args.get("page")) or 0
-    perPage = int(request.args.get("perPage")) or 50
+    limit = int(request.args.get("limit")) or 50
 
     db = Database()
     result: list[Type] = []
-    for type in db.selectAll(f"SELECT id, name, created_on, updated_on FROM types OFFSET {page * perPage} LIMIT {perPage}"):
+    maxEntities = db.selectOne(f"SELECT count(id) FROM types")
+    for type in db.selectAll(f"SELECT id, name, created_on, updated_on FROM types OFFSET {page * limit} LIMIT {limit}"):
         result.append(Type(id=type[0],
                            name=type[1],
                            created_on=type[2],
                            updated_on=type[3]))
 
-    return jsonify([type.__dict__ for type in result])
+    return jsonify({"data": [type.__dict__ for type in result],
+                    "pagination": {"count": maxEntities[0],
+                                   "last_page": math.ceil(maxEntities[0] / limit) - 1,
+                                   "limit": limit}})
 
 
 @bpType.route("/<id>", methods=["GET"])
