@@ -61,7 +61,7 @@ def get_markers():
 
         res = []
         for m in markers:
-            res.append(m)
+            res.append(m[0])
 
         return jsonify(res)
     except Exception as err:
