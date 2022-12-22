@@ -1,4 +1,7 @@
+import Airbnbs from "../Tables/Airbnbs";
+import Areas from "../Tables/Areas";
 import Hosts from "../Tables/Hosts";
+import Types from "../Tables/Types";
 
 const Sections = [
   {
@@ -6,17 +9,20 @@ const Sections = [
     label: "Hosts",
     content: <Hosts />,
   },
-
   {
-    id: "teams",
-    label: "Teams",
-    content: <h1>Teams - Work in progresss</h1>,
+    id: "types",
+    label: "Types",
+    content: <Types />,
   },
-
   {
-    id: "countries",
-    label: "Countries",
-    content: <h1>Countries - Work in progress</h1>,
+    id: "areas",
+    label: "Areas",
+    content: <Areas />,
+  },
+  {
+    id: "airbnbs",
+    label: "Airbnbs",
+    content: <Airbnbs />,
   },
 ];
 

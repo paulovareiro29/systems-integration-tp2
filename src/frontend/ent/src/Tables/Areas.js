@@ -13,7 +13,7 @@ import {
 
 import useAPI from "../Hooks/useAPI";
 
-function Hosts() {
+function Areas() {
   const PAGE_SIZE = 10;
   const { GET } = useAPI();
   const [page, setPage] = useState(1);
@@ -21,7 +21,7 @@ function Hosts() {
   const [maxDataSize, setMaxDataSize] = useState(0);
 
   useEffect(() => {
-    GET(`/host/?page=${page - 1}&limit=${PAGE_SIZE}`)
+    GET(`/area/?page=${page - 1}&limit=${PAGE_SIZE}`)
       .then((result) => {
         const data = result.data;
         setData(data.data);
@@ -39,7 +39,7 @@ function Hosts() {
 
   return (
     <>
-      <h1>Hosts</h1>
+      <h1>Areas</h1>
 
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -48,8 +48,7 @@ function Hosts() {
               <TableCell component="th" width={"1px"} align="center">
                 ID
               </TableCell>
-              <TableCell align="center">Host Name</TableCell>
-              <TableCell align="center">Verified Status</TableCell>
+              <TableCell align="center">Area Name</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -64,9 +63,6 @@ function Hosts() {
                   </TableCell>
                   <TableCell component="td" align="center" scope="row">
                     {row.name}
-                  </TableCell>
-                  <TableCell component="td" align="center" scope="row">
-                    {row.verified}
                   </TableCell>
                 </TableRow>
               ))
@@ -99,4 +95,4 @@ function Hosts() {
   );
 }
 
-export default Hosts;
+export default Areas;
