@@ -16,7 +16,7 @@ def index():
     result: list[Airbnb] = []
 
     maxEntities = db.selectOne(f"SELECT count(id) FROM airbnbs")
-    for airbnb in db.selectAll(f"SELECT id, name, price, host_id, type_id, area_id, neighbourhood, ST_X(geom), ST_Y(geom), geom, created_on, updated_on FROM airbnbs OFFSET {page * limit} LIMIT {limit}"):
+    for airbnb in db.selectAll(f"SELECT id, name, price, host_id, type_id, area_id, neighbourhood, street, ST_X(geom), ST_Y(geom), geom, created_on, updated_on FROM airbnbs OFFSET {page * limit} LIMIT {limit}"):
         result.append(Airbnb(id=airbnb[0],
                              name=airbnb[1],
                              price=airbnb[2],
@@ -24,11 +24,12 @@ def index():
                              type_id=airbnb[4],
                              area_id=airbnb[5],
                              neighbourhood=airbnb[6],
-                             latitude=airbnb[7],
-                             longitude=airbnb[8],
-                             geom=airbnb[9],
-                             created_on=airbnb[10],
-                             updated_on=airbnb[11]))
+                             street=airbnb[7],
+                             latitude=airbnb[8],
+                             longitude=airbnb[9],
+                             geom=airbnb[10],
+                             created_on=airbnb[11],
+                             updated_on=airbnb[12]))
 
     return jsonify({"data": [airbnb.__dict__ for airbnb in result],
                     "pagination": {"count": maxEntities[0],
@@ -41,7 +42,7 @@ def index():
 def get(id):
     db = Database()
     result = db.selectOne(
-        "SELECT id, name, price, host_id, type_id, area_id, neighbourhood, ST_X(geom), ST_Y(geom), geom, created_on, updated_on FROM airbnbs WHERE id=%s", (id,))
+        "SELECT id, name, price, host_id, type_id, area_id, neighbourhood,street, ST_X(geom), ST_Y(geom), geom, created_on, updated_on FROM airbnbs WHERE id=%s", (id,))
 
     if result is None:
         return jsonify(), 200
@@ -53,11 +54,12 @@ def get(id):
                     type_id=result[4],
                     area_id=result[5],
                     neighbourhood=result[6],
-                    latitude=result[7],
-                    longitude=result[8],
-                    geom=result[9],
-                    created_on=result[10],
-                    updated_on=result[11])
+                    street=result[7],
+                    latitude=result[8],
+                    longitude=result[9],
+                    geom=result[10],
+                    created_on=result[11],
+                    updated_on=result[12])
 
     return jsonify(airbnb.__dict__), 200
 
@@ -74,12 +76,13 @@ def create():
                         type_id=data.get("type_id"),
                         area_id=data.get("area_id"),
                         neighbourhood=data.get("neighbourhood"),
+                        street=data.get("street"),
                         latitude=data.get("latitude"),
                         longitude=data.get("longitude"))
 
         db = Database()
         db.insert(
-            "INSERT INTO airbnbs (id, name, price, host_id, type_id, area_id, neighbourhood, geom, created_on, updated_on) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (str(airbnb.id), airbnb.name, airbnb.price, airbnb.host_id, airbnb.type_id, airbnb.area_id, airbnb.neighbourhood, airbnb.geom, airbnb.created_on, airbnb.updated_on))
+            "INSERT INTO airbnbs (id, name, price, host_id, type_id, area_id, neighbourhood, street, geom, created_on, updated_on) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (str(airbnb.id), airbnb.name, airbnb.price, airbnb.host_id, airbnb.type_id, airbnb.area_id, airbnb.neighbourhood, airbnb.street, airbnb.geom, airbnb.created_on, airbnb.updated_on))
         return jsonify(airbnb.__dict__), 201
     except Exception as err:
         print(err)
@@ -107,12 +110,13 @@ def update(id):
                         type_id=data.get("type_id"),
                         area_id=data.get("area_id"),
                         neighbourhood=data.get("neighbourhood"),
+                        street=data.get("street"),
                         latitude=data.get("latitude"),
                         longitude=data.get("longitude"))
 
         db = Database()
         db.update(
-            f"UPDATE airbnbs SET name=%s, price=%s, host_id=%s, type_id=%s, area_id=%s, neighbourhood=%s, geom=%s, updated_on=%s WHERE id=%s", (airbnb.name, airbnb.price, airbnb.host_id, airbnb.type_id, airbnb.area_id, airbnb.neighbourhood, airbnb.geom, airbnb.updated_on, id))
+            f"UPDATE airbnbs SET name=%s, price=%s, host_id=%s, type_id=%s, area_id=%s, neighbourhood=%s,street=%s, geom=%s, updated_on=%s WHERE id=%s", (airbnb.name, airbnb.price, airbnb.host_id, airbnb.type_id, airbnb.area_id, airbnb.neighbourhood, airbnb.street, airbnb.geom, airbnb.updated_on, id))
 
         return get(id)
     except Exception as err:

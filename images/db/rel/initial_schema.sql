@@ -33,6 +33,7 @@ CREATE TABLE public.airbnbs (
 	type_id			uuid,
 	area_id			uuid,
 	neighbourhood	VARCHAR(250),
+	street			VARCHAR(250),
 	geom			GEOMETRY,
 	created_on      TIMESTAMP NOT NULL DEFAULT NOW(),
 	updated_on      TIMESTAMP NOT NULL DEFAULT NOW()
