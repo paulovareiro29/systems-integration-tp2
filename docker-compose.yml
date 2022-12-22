@@ -102,9 +102,10 @@ services:
     ports:
       - "${EXT_PORT_FRONTEND_GIS}:${EXT_PORT_FRONTEND_GIS}"
     environment:
+      WATCHPACK_POLLING: true
       USE_DEV_MODE: ${USE_DEV_MODE}
       WEB_PORT: ${EXT_PORT_FRONTEND_GIS}
-      API_GIS_URL: "api-gis:${API_PORT}"
+      API_GIS_URL: "localhost:${EXT_PORT_API_GIS}"
     depends_on:
       - api-gis
 
@@ -118,10 +119,11 @@ services:
     ports:
       - "${EXT_PORT_FRONTEND_PROC}:${EXT_PORT_FRONTEND_PROC}"
     environment:
+      WATCHPACK_POLLING: true
       USE_DEV_MODE: ${USE_DEV_MODE}
       WEB_PORT: ${EXT_PORT_FRONTEND_PROC}
-      API_GRAPHQL_URL: "api-graphql:${API_PORT}"
-      API_PROC_URL: "api-proc:${API_PORT}"
+      API_GRAPHQL_URL: "localhost:${EXT_PORT_API_GRAPHQL}"
+      API_PROC_URL: "localhost:${EXT_PORT_API_PROC}"
     depends_on:
       - api-proc
       - api-graphql
