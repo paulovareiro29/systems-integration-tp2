@@ -68,6 +68,10 @@ def create():
 def delete(id):
     try:
         db = Database()
+
+        if db.selectOne(f"SELECT count(id) FROM airbnbs WHERE host_id = %s", (id,))[0] > 0:
+            raise Exception("Integrity error")
+
         result = db.delete(f"DELETE FROM hosts WHERE id = %s", (id,))
         return jsonify(result), 200
     except Exception:

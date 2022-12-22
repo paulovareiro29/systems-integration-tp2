@@ -66,13 +66,17 @@ def create():
 def delete(id):
     try:
         db = Database()
+
+        if db.selectOne(f"SELECT count(id) FROM airbnbs WHERE area_id = %s", (id,))[0] > 0:
+            raise Exception("Integrity error")
+
         result = db.delete(f"DELETE FROM areas WHERE id = %s", (id,))
         return jsonify(result), 200
     except Exception:
         return jsonify(), 400
 
 
-@bpArea.route("/<id>", methods=["PUT"])
+@ bpArea.route("/<id>", methods=["PUT"])
 def update(id):
     data = request.get_json()
 

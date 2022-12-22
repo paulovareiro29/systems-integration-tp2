@@ -1,5 +1,5 @@
 import sys
-from flask import Flask, Response, request
+from flask import Flask
 from flask_cors import CORS
 
 from routes import bpArea, bpType, bpHost, bpAirbnb
