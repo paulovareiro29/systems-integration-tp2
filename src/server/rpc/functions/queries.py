@@ -53,27 +53,27 @@ def countAirbnbs():
     return results
 
 
-def countByArea(area):
+def fetchByArea(area):
     """Returns how many airbnbs exists by area in each file"""
     database = Database()
 
     results = []
     for e in database.selectAll(
-            f"SELECT file_name, unnest(xpath('count(//Airbnbs/Airbnb/Address[@area_ref=/Root/Areas/Area[@name=\"{area}\"]/@id])', xml)) as output FROM imported_documents WHERE deleted_on IS NULL"):
-        results.append([e[0], e[1]])
+            f"SELECT unnest(xpath('//Airbnbs/Airbnb/Address[@area_ref=/Root/Areas/Area[@name=\"{area}\"]/@id]/../Name/text()', xml)) as output FROM imported_documents WHERE deleted_on IS NULL"):
+        results.append(e[0])
 
     database.disconnect()
     return results
 
 
-def countByType(type):
+def fetchByType(type):
     """Returns how many airbnbs exists by type in each file"""
     database = Database()
 
     results = []
     for e in database.selectAll(
-            f"SELECT file_name, unnest(xpath('count(//Airbnbs/Airbnb[@type_ref=/Root/Types/Type[@name=\"{type}\"]/@id])', xml)) as output FROM imported_documents WHERE deleted_on IS NULL"):
-        results.append([e[0], e[1]])
+            f"SELECT unnest(xpath('//Airbnbs/Airbnb[@type_ref=/Root/Types/Type[@name=\"{type}\"]/@id]/Name/text()', xml)) as output FROM imported_documents WHERE deleted_on IS NULL"):
+        results.append(e[0])
 
     database.disconnect()
     return results

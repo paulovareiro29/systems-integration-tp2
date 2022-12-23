@@ -53,27 +53,27 @@ def count_airbnbs():
         return []
 
 
-@app.route('/api/count/airbnbs/area', methods=['GET'])
-def count_areas():
+@app.route('/api/airbnbs/area', methods=['GET'])
+def fetch_by_areas():
     server = ServerProxy("http://rpc-server:9000")
     args = request.args
 
     try:
         name = args["name"]
-        return server.countByArea(name)
+        return server.fetchByArea(name)
     except Exception as e:
         print(e)
         return []
 
 
-@app.route('/api/count/airbnbs/type', methods=['GET'])
-def count_types():
+@app.route('/api/airbnbs/type', methods=['GET'])
+def fetch_by_types():
     server = ServerProxy("http://rpc-server:9000")
     args = request.args
 
     try:
         name = args["name"]
-        return server.countByType(name)
+        return server.fetchByType(name)
     except Exception as e:
         print(e)
         return []

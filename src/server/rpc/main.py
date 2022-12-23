@@ -3,7 +3,7 @@ import sys
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
-from functions.queries import fetchAirbnbs, fetchAreas, fetchTypes, countAirbnbs, countByArea, countByType, fetchByPriceHigherThen, fetchByPriceLowerThen
+from functions.queries import fetchAirbnbs, fetchAreas, fetchTypes, countAirbnbs, fetchByArea, fetchByType, fetchByPriceHigherThen, fetchByPriceLowerThen
 
 PORT = int(sys.argv[1]) if len(sys.argv) >= 2 else 9000
 
@@ -32,8 +32,8 @@ if __name__ == "__main__":
         server.register_function(fetchAreas)
         server.register_function(fetchTypes)
         server.register_function(countAirbnbs)
-        server.register_function(countByArea)
-        server.register_function(countByType)
+        server.register_function(fetchByArea)
+        server.register_function(fetchByType)
         server.register_function(fetchByPriceLowerThen)
         server.register_function(fetchByPriceHigherThen)
 
