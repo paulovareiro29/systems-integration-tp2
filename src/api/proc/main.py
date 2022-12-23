@@ -1,12 +1,15 @@
 import sys
 
 from flask import Flask, request
+from flask_cors import CORS
 from xmlrpc.client import ServerProxy
 
 PORT = int(sys.argv[1]) if len(sys.argv) >= 2 else 9000
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
+
+CORS(app)
 
 
 @app.route('/api/airbnbs', methods=['GET'])
