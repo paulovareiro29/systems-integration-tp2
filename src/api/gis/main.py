@@ -35,7 +35,7 @@ def get_markers():
                     'geometry', ST_AsGeoJSON(geom):: jsonb,
                     'properties', to_jsonb(t.*) - 'id' - 'geom'
                 ) AS json
-                    FROM (SELECT id, name, price, neighbourhood, geom FROM airbnbs WHERE geom && ST_MakeEnvelope(%s,%s,%s,%s)) AS t(id, name, price, neighbourhood, geom)""", (neLat, neLng, swLat, swLng))
+                    FROM (SELECT id, name, price, neighbourhood, street, geom FROM airbnbs WHERE geom && ST_MakeEnvelope(%s,%s,%s,%s) AND street IS NOT NULL)  AS t(id, name, price, neighbourhood, street, geom)""", (neLat, neLng, swLat, swLng))
 
         res = []
         for m in markers:

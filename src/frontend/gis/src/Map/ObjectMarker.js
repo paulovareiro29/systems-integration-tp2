@@ -14,6 +14,7 @@ import ApartmentIcon from "@mui/icons-material/Apartment";
 
 const LIST_PROPERTIES = [
   { key: "price", label: "Price", Icon: AttachMoneyIcon },
+  { key: "street", label: "Street", Icon: ApartmentIcon },
   { key: "neighbourhood", label: "Neighbourhood", Icon: ApartmentIcon },
 ];
 
