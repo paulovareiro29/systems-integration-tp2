@@ -1,19 +1,11 @@
-import TopTeams from "../Procedures/TopTeams";
+import FullList from "../Procedures/FullList";
 
 const Sections = [
-
-    {
-        id: "top-teams",
-        label: "Top Teams",
-        content: <TopTeams/>
-    },
-
-    {
-        id: "top-scorers",
-        label: "Top Scorers",
-        content: <h1>Top Scorers - Work in progresss</h1>
-    }
-
+  {
+    id: "listing",
+    label: "Full List",
+    content: <FullList />,
+  },
 ];
 
 export default Sections;
