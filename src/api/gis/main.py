@@ -12,28 +12,6 @@ app.config["DEBUG"] = True
 
 CORS(app)
 
-''' @app.route('/api/markers', methods=['GET'])
-def get_markers():
-    args = request.args
-
-    return [
-        {
-            "type": "feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [41.69462, -8.84679]
-            },
-            "properties": {
-                "id": "7674fe6a-6c8d-47b3-9a1f-18637771e23b",
-                "name": "Ronaldo",
-                "country": "Portugal",
-                "position": "Striker",
-                "imgUrl": "https://cdn-icons-png.flaticon.com/512/805/805401.png",
-                "number": 7
-            }
-        }
-    ] '''
-
 
 @app.route('/api/tile')
 def get_markers():
@@ -64,6 +42,36 @@ def get_markers():
             res.append(m[0])
 
         return jsonify(res)
+    except Exception as err:
+        print(err)
+        return jsonify(), 400
+
+
+@app.route('/api/airbnbs')
+def get_airbnbs():
+    args = request.args
+
+    limit = args.get("limit") or 20
+
+    try:
+        db = Database()
+
+        result = []
+        for airbnb in db.selectAll(f"SELECT id, name, price, host_id, type_id, area_id, neighbourhood, street, ST_X(geom), ST_Y(geom), geom, created_on, updated_on FROM airbnbs LIMIT %s", (limit,)):
+            result.append({"id": airbnb[0],
+                           "name": airbnb[1],
+                           "price": airbnb[2],
+                           "host_id": airbnb[3],
+                           "type_id": airbnb[4],
+                           "area_id": airbnb[5],
+                           "neighbourhood": airbnb[6],
+                           "street": airbnb[7],
+                           "latitude": airbnb[8],
+                           "longitude": airbnb[9],
+                           "created_on": airbnb[11],
+                           "updated_on": airbnb[12]})
+
+        return jsonify(result)
     except Exception as err:
         print(err)
         return jsonify(), 400
