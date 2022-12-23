@@ -11,7 +11,7 @@ if __name__ == "__main__":
     class RequestHandler(SimpleXMLRPCRequestHandler):
         rpc_paths = ('/RPC2',)
 
-    with SimpleXMLRPCServer(('localhost', PORT), requestHandler=RequestHandler) as server:
+    with SimpleXMLRPCServer(('0.0.0.0', PORT), requestHandler=RequestHandler) as server:
         server.register_introspection_functions()
 
         def signal_handler(signum, frame):
