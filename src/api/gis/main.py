@@ -47,7 +47,7 @@ def get_markers():
         return jsonify(), 400
 
 
-@app.route('/api/airbnbs')
+@app.route('/api/airbnb', methods=["GET"])
 def get_airbnbs():
     args = request.args
 
@@ -72,6 +72,22 @@ def get_airbnbs():
                            "updated_on": airbnb[12]})
 
         return jsonify(result)
+    except Exception as err:
+        print(err)
+        return jsonify(), 400
+
+
+@app.route("/api/airbnb/<id>", methods=["PUT"])
+def update_airbnb(id):
+    data = request.get_json()
+    print("Updating..")
+    try:
+        street = data["street"]
+
+        db = Database()
+        db.update(f"UPDATE airbnbs SET street=%s WHERE id = %s", (street, id))
+
+        return jsonify(True), 200
     except Exception as err:
         print(err)
         return jsonify(), 400

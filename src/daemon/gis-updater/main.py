@@ -13,17 +13,42 @@ if __name__ == "__main__":
         print(
             f"Getting up to {ENTITIES_PER_ITERATION} entities without coordinates...")
 
-        # !TODO: 1- Use api-gis to retrieve a fixed amount of entities without coordinates (e.g. 100 entities per iteration, use ENTITIES_PER_ITERATION)
+        # Use api-gis to retrieve a fixed amount of entities without coordinates (e.g. 100 entities per iteration, use ENTITIES_PER_ITERATION)
         api_gis = API("http://api-gis:8080")
 
-        entities = api_gis.get(f"/api/airbnbs?limit={ENTITIES_PER_ITERATION}")
+        entities = api_gis.get(f"/api/airbnb?limit={ENTITIES_PER_ITERATION}")
 
         if entities["code"] != 200:
+            print(entities["message"])
             time.sleep(POLLING_FREQ)
             continue
 
+        # Use the entity information to retrieve coordinates from an external API
+        api_nominatim = API("https://nominatim.openstreetmap.org")
+
         for airbnb in entities["data"]:
-            print(airbnb["latitude"], airbnb["longitude"])
-        # !TODO: 2- Use the entity information to retrieve coordinates from an external API
-        # !TODO: 3- Submit the changes
+            res = api_nominatim.get(
+                f"/reverse?format=json&lat={airbnb['latitude']}&lon={airbnb['longitude']}")
+
+            if res["code"] != 200:
+                continue
+
+            data = res["data"]
+
+            house_number = data["address"].get("house_number") or ""
+            road = data["address"].get("road") or ""
+
+            street = f"{house_number}, {road}"
+            if street.startswith(","):
+                street = street.replace(",", "").strip()
+
+            print(street)
+
+            # Submit the changes
+            updated = api_gis.put(
+                f"/api/airbnb/{airbnb['id']}", {"street": street})
+
+            if updated["code"] == 200:
+                print("Updated Successfuly!")
+
         time.sleep(POLLING_FREQ)
