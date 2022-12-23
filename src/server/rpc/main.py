@@ -1,9 +1,9 @@
-import signal, sys
+import signal
+import sys
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
-from functions.string_length import string_length
-from functions.string_reverse import string_reverse
+from functions.queries import fetchAirbnbs, fetchAreas, fetchTypes, countAirbnbs, countByArea, countByType, fetchByPriceHigherThen, fetchByPriceLowerThen
 
 PORT = int(sys.argv[1]) if len(sys.argv) >= 2 else 9000
 
@@ -28,8 +28,14 @@ if __name__ == "__main__":
         signal.signal(signal.SIGINT, signal_handler)
 
         # register both functions
-        server.register_function(string_reverse)
-        server.register_function(string_length)
+        server.register_function(fetchAirbnbs)
+        server.register_function(fetchAreas)
+        server.register_function(fetchTypes)
+        server.register_function(countAirbnbs)
+        server.register_function(countByArea)
+        server.register_function(countByType)
+        server.register_function(fetchByPriceLowerThen)
+        server.register_function(fetchByPriceHigherThen)
 
         # start the server
         print(f"Starting the RPC Server in port {PORT}...")
