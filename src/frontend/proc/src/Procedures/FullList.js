@@ -9,11 +9,14 @@ import {
   Select,
 } from "@mui/material";
 import useAPI from "../Hooks/useAPI";
+import useGraphql from "../Hooks/useGraphql";
 
 const ELEMENTS = ["airbnbs", "areas", "types"];
 
 function FullList() {
   const { GET } = useAPI();
+  const gql = useGraphql();
+
   const [selectedElement, setSelectedElement] = useState("");
 
   const [procData, setProcData] = useState(null);
@@ -32,9 +35,16 @@ function FullList() {
       setProcData(data);
     });
 
-    setTimeout(() => {
-      setGQLData([]);
-    }, 500);
+    gql(`{
+      ${selectedElement} {
+        name
+      }
+    }`).then((result) => {
+      const data = result.data.data;
+      const elements = data[selectedElement];
+
+      setGQLData(elements.map((el) => el.name));
+    });
   }, [selectedElement]);
 
   return (
