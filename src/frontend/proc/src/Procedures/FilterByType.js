@@ -9,9 +9,12 @@ import {
   Select,
 } from "@mui/material";
 import useAPI from "../Hooks/useAPI";
+import useGraphql from "../Hooks/useGraphql";
 
 function FilterByType() {
   const { GET } = useAPI();
+  const gql = useGraphql();
+
   const [selectedElement, setSelectedElement] = useState("");
 
   const [types, setTypes] = useState([]);
@@ -27,8 +30,6 @@ function FilterByType() {
   }, []);
 
   useEffect(() => {
-    //!FIXME: this is to simulate how to retrieve data from the server
-    //!FIXME: the entities server URL is available on process.env.REACT_APP_API_ENTITIES_URL
     setGQLData(null);
     setProcData(null);
 
@@ -41,14 +42,21 @@ function FilterByType() {
       setProcData(data);
     });
 
-    setTimeout(() => {
-      setGQLData([]);
-    }, 500);
+    gql(`{
+      byType(name: "${selectedElement === "EMPTY" ? "" : selectedElement}") {
+        name
+      }
+    }`).then((result) => {
+      const data = result.data.data;
+      const elements = data.byType;
+
+      setGQLData(elements.map((el) => el.name));
+    });
   }, [selectedElement]);
 
   return (
     <>
-      <h1>Filter By</h1>
+      <h1>Filter By Type</h1>
 
       <Container
         maxWidth="100%"

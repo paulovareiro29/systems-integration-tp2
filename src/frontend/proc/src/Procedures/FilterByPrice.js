@@ -11,9 +11,11 @@ import {
   Button,
 } from "@mui/material";
 import useAPI from "../Hooks/useAPI";
+import useGraphql from "../Hooks/useGraphql";
 
 function FilterByPrice() {
   const { GET } = useAPI();
+  const gql = useGraphql();
 
   const [filter, setFilter] = useState({
     direction: "higher", // "higher" or "lower"
@@ -26,8 +28,6 @@ function FilterByPrice() {
   const [gqlData, setGQLData] = useState(null);
 
   const fetchData = () => {
-    //!FIXME: this is to simulate how to retrieve data from the server
-    //!FIXME: the entities server URL is available on process.env.REACT_APP_API_ENTITIES_URL
     setGQLData(null);
     setProcData(null);
     setLoading(true);
@@ -40,14 +40,24 @@ function FilterByPrice() {
       }
     );
 
-    setTimeout(() => {
-      setGQLData([]);
-    }, 500);
+    const capitalizedDirection =
+      filter.direction.charAt(0).toUpperCase() + filter.direction.slice(1);
+
+    gql(`{
+      by${capitalizedDirection}Price(value: ${filter.amount}) {
+        name
+      }
+    }`).then((result) => {
+      const data = result.data.data;
+      const elements = data[`by${capitalizedDirection}Price`];
+
+      setGQLData(elements.map((el) => el.name));
+    });
   };
 
   return (
     <>
-      <h1>Filter By</h1>
+      <h1>Filter By Price</h1>
 
       <Container
         maxWidth="100%"
