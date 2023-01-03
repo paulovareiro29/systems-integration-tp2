@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     while True:
         print(
-            f"Getting up to {ENTITIES_PER_ITERATION} entities without coordinates...")
+            f"Getting up to {ENTITIES_PER_ITERATION} entities without street...")
 
         # Use api-gis to retrieve a fixed amount of entities without coordinates (e.g. 100 entities per iteration, use ENTITIES_PER_ITERATION)
         api_gis = API("http://api-gis:8080")

@@ -57,7 +57,7 @@ def get_airbnbs():
         db = Database()
 
         result = []
-        for airbnb in db.selectAll(f"SELECT id, name, price, host_id, type_id, area_id, neighbourhood, street, ST_X(geom), ST_Y(geom), geom, created_on, updated_on FROM airbnbs LIMIT %s", (limit,)):
+        for airbnb in db.selectAll(f"SELECT id, name, price, host_id, type_id, area_id, neighbourhood, street, ST_X(geom), ST_Y(geom), geom, created_on, updated_on FROM airbnbs WHERE street IS NULL LIMIT %s", (limit,)):
             result.append({"id": airbnb[0],
                            "name": airbnb[1],
                            "price": airbnb[2],
